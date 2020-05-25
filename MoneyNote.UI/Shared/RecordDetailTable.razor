@@ -1,0 +1,64 @@
+﻿@using MoneyNote.DomainModel
+@using System.Reflection;
+@using MoneyNote.Utils;
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            @foreach (var name in this.ColumnNames)
+            {
+                <th>@Records.GetDescription(name)</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (var rowIdx = 0; rowIdx < Records.Count; rowIdx++)
+        {
+            <tr>
+                <td>@rowIdx</td>
+                @foreach (var colName in this.ColumnNames)
+                {
+                    if (IsAsSameAsPrevious(rowIdx, colName) == false)
+                    {
+                        <td rowspan="@(GetSpan(rowIdx, colName))">@this.Records[rowIdx].GetValueByPropName(colName)</td>
+                    }
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code{
+    [Parameter]
+    public List<RecordModel> Records { get; set; }
+
+    [Parameter]
+    public List<string> ColumnNames { get; set; }
+
+    private int GetSpan(int index, string propName)
+    {
+        var k = 1;
+        var value = this.Records[index].GetValueByPropName(propName);
+        for (; index + k < Records.Count; k++)
+        {
+            var temp = Records[index + k].GetValueByPropName(propName);
+            if (temp != value)
+            {
+                return k + 1;
+            }
+        }
+        return k;
+    }
+
+    private bool IsAsSameAsPrevious(int idx, string propName)
+    {
+        if (idx == 0)
+        {
+            return false;
+        }
+        else
+        {
+            return this.Records[idx].GetValueByPropName(propName) == this.Records[idx - 1].GetValueByPropName(propName);
+        }
+    }
+}
